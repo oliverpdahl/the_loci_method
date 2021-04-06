@@ -25,16 +25,21 @@ const Home = () => {
           </Button>
         }
       />
-      <Wrapper>
-        <Typography paragraph variant='h5'>
-          Welcome to your new app!
-        </Typography>
 
+      <Wrapper>
+        <Typography paragraph variant='h3'>
+          Create Mind Palaces to Remember Like Never Before
+        </Typography>
+        <Typography paragraph>
+          An ideal mind palace is a brightly lit deserted place with a standard
+          rout through it like a museum or school after hours and is filled with
+          striking images of people doing an action to encode information with a
+          key transition at every fifth image
+        </Typography>
         <Typography paragraph variant='h5'>
           Don't forget to configure your firebase settings in{' '}
           <code>/src/firebase/firebase.ts</code>
         </Typography>
-
         <Box mt={6}>
           <Typography paragraph>
             This is an example form using react-hook-form
@@ -61,6 +66,7 @@ const Home = () => {
             Submit
           </Button>
         </form>
+        */
       </Wrapper>
     </>
   )
