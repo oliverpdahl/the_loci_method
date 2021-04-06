@@ -7,13 +7,17 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import firebase from '../firebase'
 import formErrorMessages from '../utils/formErrorMessages'
+import { StringLiteral } from 'typescript'
 
 const Home = () => {
-  const { register, errors, handleSubmit, reset } = useForm<{ name: string }>()
-  const [title, setTitle] = useState('')
+  const { register, errors, handleSubmit, reset } = useForm<{
+    title: string
+    location: string
+    uid: string
+    created: number
+    reviewed: number
+  }>()
   const journeyRef = firebase.database().ref('Journey')
-
-  var user = firebase.auth().currentUser
 
   return (
     <>
@@ -59,12 +63,12 @@ const Home = () => {
 
         <form
           onSubmit={handleSubmit(vals => {
+            var user = firebase.auth().currentUser
             if (user) {
-              vals.push({
-                key: 'userID',
-                value: firebase.auth().currentUser?.uid
-              })
+              vals.uid = firebase.auth().currentUser?.uid || ''
             }
+            vals.created = new Date().getTime()
+            vals.reviewed = new Date().getTime()
             journeyRef.push(vals)
             reset()
           })}
@@ -77,8 +81,8 @@ const Home = () => {
             inputRef={register({
               required: formErrorMessages.required
             })}
-            error={!!errors.name}
-            helperText={errors.name?.message || ' '}
+            error={!!errors.title}
+            helperText={errors.title?.message || ' '}
           />
           <TextField
             label='What is the location of the mind palace for your journey?'
@@ -88,8 +92,8 @@ const Home = () => {
             inputRef={register({
               required: formErrorMessages.required
             })}
-            error={!!errors.name}
-            helperText={errors.name?.message || ' '}
+            error={!!errors.location}
+            helperText={errors.location?.message || ' '}
           />
           <Button type='submit' color='primary'>
             Submit
