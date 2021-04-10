@@ -7,9 +7,16 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Divider
+  Divider,
+  Card,
+  CardActions,
+  CardContent,
+  IconButton
 } from '@material-ui/core'
 import { Link } from 'react-router-dom'
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
+import EditIcon from '@material-ui/icons/Edit'
+import RateReviewIcon from '@material-ui/icons/RateReview'
 import routes from './routes'
 import Wrapper from '../components/Wrapper'
 import AppBar from '../components/AppBar'
@@ -20,16 +27,17 @@ import formErrorMessages from '../utils/formErrorMessages'
 import { StringLiteral } from 'typescript'
 import ArrowDropDownCircleIcon from '@material-ui/icons/ArrowDropDownCircle'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
+import { Edit } from '@material-ui/icons'
 
 const Home = () => {
   const { register, errors, handleSubmit, reset } = useForm<Journey>()
 
   var JourneyListEmpty: Journey[] = []
   const [reviewedJourneyList, setReviewedJourneyList] = useState(
-    JourneyListEmpty
+    JourneyListEmpty.slice()
   )
   const [toReviewJourneyList, setToReviewJourneyList] = useState(
-    JourneyListEmpty
+    JourneyListEmpty.slice()
   )
 
   const journeyRef = firebase.database().ref('Journey')
@@ -51,12 +59,12 @@ const Home = () => {
   const getJourneys = () => {
     const now = new Date().getTime()
     journeyRef
-      .orderByChild('uid')
-      .equalTo(firebase.auth().currentUser?.uid || '')
+      // .orderByChild('uid')
+      // .equalTo(firebase.auth().currentUser?.uid || '')
       .on('value', snapshot => {
         const journeys = snapshot.val()
-        const reviewedList = []
-        const toReviewList = []
+        const reviewedList = JourneyListEmpty.slice()
+        const toReviewList = JourneyListEmpty.slice()
         for (let id in journeys) {
           if (now > journeys[id].nextReview) {
             toReviewList.push({ id, ...journeys[id] })
@@ -73,6 +81,55 @@ const Home = () => {
     if (firebase.auth().currentUser) {
       return 'Welcome ' + firebase.auth().currentUser?.displayName
     }
+  }
+
+  const handleJourneyDelete = (id: string) => {
+    journeyRef.child(id).remove()
+  }
+
+  const createJourneyCard = (journey: Journey) => {
+    return (
+      <Card>
+        <CardContent>
+          <Typography color='textSecondary' gutterBottom>
+            {journey.id}
+          </Typography>
+          <Typography variant='h5' component='h2'>
+            {journey.title}
+          </Typography>
+          <Typography color='textSecondary'>{journey.location}</Typography>
+          <Typography variant='body2' component='p'>
+            well meaning and kindly.
+            <br />
+            {'"a benevolent smile"'}
+          </Typography>
+        </CardContent>
+        <CardActions disableSpacing>
+          <IconButton aria-label='review'>
+            <RateReviewIcon />
+          </IconButton>
+          <IconButton aria-label='edit'>
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            aria-label='delete'
+            onClick={() => {
+              handleJourneyDelete(journey.id)
+            }}
+          >
+            <DeleteForeverIcon />
+          </IconButton>
+        </CardActions>
+      </Card>
+    )
+  }
+
+  const createJourneyCards = (journeyList: Journey[]) => {
+    let list = []
+    for (let i = 0; i < journeyList.length; i++) {
+      list.push(createJourneyCard(journeyList[i]))
+    }
+    return <div>{list}</div>
   }
 
   return (
@@ -120,7 +177,9 @@ const Home = () => {
               Journeys to Review
             </AccordionSummary>
             <Divider />
-            <AccordionDetails>{toReviewJourneyList}</AccordionDetails>
+            <AccordionDetails>
+              {createJourneyCards(toReviewJourneyList)}
+            </AccordionDetails>
           </Accordion>
         </Paper>
         <p></p>
@@ -180,7 +239,9 @@ const Home = () => {
               Journeys Not Up for Review
             </AccordionSummary>
             <Divider />
-            <AccordionDetails>{reviewedJourneyList}</AccordionDetails>
+            <AccordionDetails>
+              {createJourneyCards(reviewedJourneyList)}
+            </AccordionDetails>
           </Accordion>
         </Paper>
       </Wrapper>
