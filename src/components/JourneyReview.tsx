@@ -37,12 +37,14 @@ const useStyles = makeStyles(theme => ({
 
 export default function JourneyReview(props: any) {
   const ImageListEmpty: Image[] = []
+  const StringListEmpty: string[] = []
 
   const classes = useStyles()
   const [activeStep, setActiveStep] = React.useState(0)
   const [openAddImageModal, setAddImageModal] = React.useState(false)
   const { register, errors, handleSubmit, reset } = useForm<Image>()
   const [imagesList, setImagesList] = React.useState(ImageListEmpty.slice())
+  const [steps, setSteps] = React.useState(StringListEmpty.slice())
 
   const journeyRef = firebase.database().ref('Journey')
   const imageRef = firebase.database().ref('Image')
@@ -96,22 +98,15 @@ export default function JourneyReview(props: any) {
       .on('value', snapshot => {
         const images = snapshot.val()
         let imagesList = ImageListEmpty.slice()
+        let stepsList = StringListEmpty.slice()
         for (let id in images) {
           imagesList[images[id].order] = { id, ...images[id] }
+          stepsList[images[id].order] = images[id].location
         }
         setImagesList(imagesList)
+        setSteps(stepsList)
       })
   }
-
-  const getSteps = () => {
-    let list = []
-    for (let i = 0; i < imagesList.length; i++) {
-      list[imagesList[i].order] = imagesList[i].location
-    }
-    return list
-  }
-
-  const steps = getSteps()
 
   const getStepContent = (step: any) => {
     const description = imagesList[step].description
@@ -226,7 +221,11 @@ export default function JourneyReview(props: any) {
               <IconButton>
                 <EditIcon />
               </IconButton>
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  handleDeleteImage(index)
+                }}
+              >
                 <DeleteForeverIcon />
               </IconButton>
             </StepLabel>
