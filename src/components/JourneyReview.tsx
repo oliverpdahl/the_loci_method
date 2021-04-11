@@ -8,6 +8,13 @@ import Button from '@material-ui/core/Button'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 import firebase from '../firebase'
+import PostAddIcon from '@material-ui/icons/PostAdd'
+import { IconButton } from '@material-ui/core'
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
+import EditIcon from '@material-ui/icons/Edit'
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
+import Modal from '@material-ui/core/Modal'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -50,6 +57,7 @@ function getStepContent(step: any) {
 export default function JourneyReview(props: any) {
   const classes = useStyles()
   const [activeStep, setActiveStep] = React.useState(0)
+  const [openAddImageModal, setAddImageModal] = React.useState(false)
   const steps = getSteps()
 
   const journeyRef = firebase.database().ref('Journey')
@@ -79,12 +87,42 @@ export default function JourneyReview(props: any) {
       .update({ reviewed: now, nextReview: now + props.nextReview })
   }
 
+  const handleClose = () => {
+    setAddImageModal(false)
+  }
+
   return (
     <div className={classes.root}>
+      <Modal
+        open={openAddImageModal}
+        onClose={handleClose}
+        style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
+      >
+        <Paper>
+          <p>This is where form go</p>
+        </Paper>
+      </Modal>
       <Stepper activeStep={activeStep} orientation='vertical'>
         {steps.map((label, index) => (
           <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+            <StepLabel>
+              {label}
+              {/* <IconButton>
+                    <PostAddIcon/>
+                </IconButton> */}
+              <IconButton>
+                <ArrowUpwardIcon />
+              </IconButton>
+              <IconButton>
+                <ArrowDownwardIcon />
+              </IconButton>
+              <IconButton>
+                <EditIcon />
+              </IconButton>
+              <IconButton>
+                <DeleteForeverIcon />
+              </IconButton>
+            </StepLabel>
             <StepContent>
               <Typography>{getStepContent(index)}</Typography>
               <div className={classes.actionsContainer}>
@@ -110,6 +148,14 @@ export default function JourneyReview(props: any) {
           </Step>
         ))}
       </Stepper>
+      <Button
+        className={classes.button}
+        onClick={() => {
+          setAddImageModal(true)
+        }}
+      >
+        Add New Image
+      </Button>
       {activeStep === steps.length && (
         <Paper square elevation={0} className={classes.resetContainer}>
           <Typography>All steps completed - you&apos;re finished</Typography>
