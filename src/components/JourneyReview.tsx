@@ -17,6 +17,7 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
 import Modal from '@material-ui/core/Modal'
 import formErrorMessages from '../utils/formErrorMessages'
 import { useForm } from 'react-hook-form'
+import EditFormImage from '../components/EditFormImage'
 import 'rxjs/add/operator/map'
 
 const useStyles = makeStyles(theme => ({
@@ -45,6 +46,8 @@ export default function JourneyReview(props: any) {
   const { register, errors, handleSubmit, reset } = useForm<Image>()
   const [imagesList, setImagesList] = React.useState(ImageListEmpty.slice())
   const [steps, setSteps] = React.useState(StringListEmpty.slice())
+  const [openEditModal, setOpenEditModal] = React.useState(false)
+  const [imageToEditID, setImageToEditID] = React.useState('')
 
   const journeyRef = firebase.database().ref('Journey')
   const imageRef = firebase.database().ref('Image')
@@ -140,6 +143,16 @@ export default function JourneyReview(props: any) {
   return (
     <div className={classes.root}>
       <Modal
+        open={openEditModal}
+        onClose={() => {
+          setOpenEditModal(false)
+        }}
+        style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
+      >
+        <EditFormImage editID={imageToEditID} setModal={setOpenEditModal} />
+        {/* <EditForm editID={journeyToEditID} setModal={setOpenEditModal} /> */}
+      </Modal>
+      <Modal
         open={openAddImageModal}
         onClose={handleClose}
         style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
@@ -218,7 +231,12 @@ export default function JourneyReview(props: any) {
               >
                 <ArrowDownwardIcon />
               </IconButton>
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  setOpenEditModal(true)
+                  setImageToEditID(getImageIDFromStep(index))
+                }}
+              >
                 <EditIcon />
               </IconButton>
               <IconButton
@@ -262,7 +280,7 @@ export default function JourneyReview(props: any) {
       >
         Add New Image
       </Button>
-      {activeStep === steps.length && (
+      {activeStep === steps.length - 1 && (
         <Paper square elevation={0} className={classes.resetContainer}>
           <Typography>All steps completed - you&apos;re finished</Typography>
           <Button onClick={handleReset} className={classes.button}>
