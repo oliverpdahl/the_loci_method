@@ -120,6 +120,28 @@ export default function JourneyReview(props: any) {
     return message
   }
 
+  const getImageIDFromStep = (step: any) => {
+    return imagesList[step].id
+  }
+
+  const handleMoveUp = (step: any) => {
+    if (step != 0) {
+      imageRef.child(getImageIDFromStep(step)).update({ order: step - 1 })
+      imageRef.child(getImageIDFromStep(step - 1)).update({ order: step })
+    }
+  }
+
+  const handleMoveDown = (step: any) => {
+    if (step != imagesList.length - 1) {
+      imageRef.child(getImageIDFromStep(step)).update({ order: step + 1 })
+      imageRef.child(getImageIDFromStep(step + 1)).update({ order: step })
+    }
+  }
+
+  const handleDeleteImage = (step: any) => {
+    imageRef.child(getImageIDFromStep(step)).remove()
+  }
+
   return (
     <div className={classes.root}>
       <Modal
@@ -187,10 +209,18 @@ export default function JourneyReview(props: any) {
               {/* <IconButton>
                     <PostAddIcon/>
                 </IconButton> */}
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  handleMoveUp(index)
+                }}
+              >
                 <ArrowUpwardIcon />
               </IconButton>
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  handleMoveDown(index)
+                }}
+              >
                 <ArrowDownwardIcon />
               </IconButton>
               <IconButton>
