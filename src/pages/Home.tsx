@@ -29,6 +29,8 @@ import { StringLiteral } from 'typescript'
 import ArrowDropDownCircleIcon from '@material-ui/icons/ArrowDropDownCircle'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import { Edit } from '@material-ui/icons'
+import EditForm from '../components/EditForm'
+import JourneyReview from '../components/JourneyReview'
 
 const Home = () => {
   const { register, errors, handleSubmit, reset } = useForm<Journey>()
@@ -42,6 +44,10 @@ const Home = () => {
   )
 
   const [openEditModal, setOpenEditModal] = useState(false)
+  const [openReviewModal, setOpenReviewModal] = useState(false)
+  const [journeyToEditID, setJourneyToEditID] = useState('')
+  const [journeyToReviewID, setJourneyToReviewID] = useState('')
+  const [journeyToReviewNextReview, setJourneyToReviewNextReview] = useState(0)
   const journeyRef = firebase.database().ref('Journey')
 
   type Journey = {
@@ -56,7 +62,7 @@ const Home = () => {
 
   useEffect(() => {
     getJourneys()
-  })
+  }, [])
 
   const getJourneys = () => {
     const now = new Date().getTime()
@@ -101,19 +107,30 @@ const Home = () => {
           </Typography>
           <Typography color='textSecondary'>{journey.location}</Typography>
           <Typography variant='body2' component='p'>
-            well meaning and kindly.
+            Reviewed: {new Date(journey.reviewed).toString()}
+            <br />
+            Next Review: {new Date(journey.nextReview).toString()}
             <br />
             {'"a benevolent smile"'}
           </Typography>
         </CardContent>
         <CardActions disableSpacing>
-          <IconButton aria-label='review'>
+          <IconButton
+            aria-label='review'
+            onClick={() => {
+              setOpenReviewModal(true)
+              setJourneyToReviewID(journey.id)
+              const nextReview = (journey.nextReview - journey.reviewed) * 2
+              setJourneyToReviewNextReview(nextReview)
+            }}
+          >
             <RateReviewIcon />
           </IconButton>
           <IconButton
             aria-label='edit'
             onClick={() => {
               setOpenEditModal(true)
+              setJourneyToEditID(journey.id)
             }}
           >
             <EditIcon />
@@ -160,12 +177,23 @@ const Home = () => {
         onClose={() => {
           setOpenEditModal(false)
         }}
-        style={{ width: '80%', position: 'absolute', top: '40%', left: '10%' }}
+        style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
+      >
+        <EditForm editID={journeyToEditID} setModal={setOpenEditModal} />
+      </Modal>
+      <Modal
+        open={openReviewModal}
+        onClose={() => {
+          setOpenReviewModal(false)
+        }}
+        style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
       >
         <Paper>
-          <Typography paragraph variant='h3'>
-            This is here
-          </Typography>
+          <JourneyReview
+            reviewID={journeyToReviewID}
+            setModal={setOpenReviewModal}
+            nextReview={journeyToReviewNextReview}
+          />
         </Paper>
       </Modal>
       <Wrapper>
@@ -216,7 +244,7 @@ const Home = () => {
                   }
                   vals.created = new Date().getTime()
                   vals.reviewed = new Date().getTime()
-                  vals.nextReview = new Date().getTime()
+                  vals.nextReview = new Date().getTime() + 86400000
                   journeyRef.push(vals)
                   reset()
                 })}
