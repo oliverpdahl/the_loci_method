@@ -11,7 +11,8 @@ import {
   Card,
   CardActions,
   CardContent,
-  IconButton
+  IconButton,
+  Modal
 } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
@@ -40,6 +41,7 @@ const Home = () => {
     JourneyListEmpty.slice()
   )
 
+  const [openEditModal, setOpenEditModal] = useState(false)
   const journeyRef = firebase.database().ref('Journey')
 
   type Journey = {
@@ -108,7 +110,12 @@ const Home = () => {
           <IconButton aria-label='review'>
             <RateReviewIcon />
           </IconButton>
-          <IconButton aria-label='edit'>
+          <IconButton
+            aria-label='edit'
+            onClick={() => {
+              setOpenEditModal(true)
+            }}
+          >
             <EditIcon />
           </IconButton>
           <IconButton
@@ -148,7 +155,19 @@ const Home = () => {
           </Button>
         }
       />
-
+      <Modal
+        open={openEditModal}
+        onClose={() => {
+          setOpenEditModal(false)
+        }}
+        style={{ width: '80%', position: 'absolute', top: '40%', left: '10%' }}
+      >
+        <Paper>
+          <Typography paragraph variant='h3'>
+            This is here
+          </Typography>
+        </Paper>
+      </Modal>
       <Wrapper>
         <Typography paragraph>{currentUserString()}</Typography>
         <Typography paragraph variant='h3'>
