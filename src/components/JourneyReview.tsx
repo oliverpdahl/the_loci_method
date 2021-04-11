@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import Stepper from '@material-ui/core/Stepper'
 import Step from '@material-ui/core/Step'
@@ -9,12 +9,15 @@ import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 import firebase from '../firebase'
 import PostAddIcon from '@material-ui/icons/PostAdd'
-import { IconButton } from '@material-ui/core'
+import { IconButton, TextField } from '@material-ui/core'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
 import EditIcon from '@material-ui/icons/Edit'
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward'
 import Modal from '@material-ui/core/Modal'
+import formErrorMessages from '../utils/formErrorMessages'
+import { useForm } from 'react-hook-form'
+import 'rxjs/add/operator/map'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -32,35 +35,30 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-function getSteps() {
-  return ['Select campaign settings', 'Create an ad group', 'Create an ad']
-}
-
-function getStepContent(step: any) {
-  switch (step) {
-    case 0:
-      return `For each ad campaign that you create, you can control how much
-              you're willing to spend on clicks and conversions, which networks
-              and geographical locations you want your ads to show on, and more.`
-    case 1:
-      return 'An ad group contains one or more ads which target a shared set of keywords.'
-    case 2:
-      return `Try out different ad text to see what brings in the most customers,
-              and learn how to enhance your ads using features like ad extensions.
-              If you run into any problems with your ads, find out how to tell if
-              they're running and how to resolve approval issues.`
-    default:
-      return 'Unknown step'
-  }
-}
-
 export default function JourneyReview(props: any) {
+  const ImageListEmpty: Image[] = []
+
   const classes = useStyles()
   const [activeStep, setActiveStep] = React.useState(0)
   const [openAddImageModal, setAddImageModal] = React.useState(false)
-  const steps = getSteps()
+  const { register, errors, handleSubmit, reset } = useForm<Image>()
+  const [imagesList, setImagesList] = React.useState(ImageListEmpty.slice())
 
   const journeyRef = firebase.database().ref('Journey')
+  const imageRef = firebase.database().ref('Image')
+
+  type Image = {
+    id: string
+    order: number
+    journeyID: string
+    location: string
+    description: string
+    meaning: string
+  }
+
+  useEffect(() => {
+    getImages()
+  }, [])
 
   const handleNext = () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1)
@@ -91,6 +89,37 @@ export default function JourneyReview(props: any) {
     setAddImageModal(false)
   }
 
+  const getImages = () => {
+    imageRef
+      .orderByChild('journeyID')
+      .equalTo(props.reviewID)
+      .on('value', snapshot => {
+        const images = snapshot.val()
+        let imagesList = ImageListEmpty.slice()
+        for (let id in images) {
+          imagesList[images[id].order] = { id, ...images[id] }
+        }
+        setImagesList(imagesList)
+      })
+  }
+
+  const getSteps = () => {
+    let list = []
+    for (let i = 0; i < imagesList.length; i++) {
+      list[imagesList[i].order] = imagesList[i].location
+    }
+    return list
+  }
+
+  const steps = getSteps()
+
+  const getStepContent = (step: any) => {
+    const description = imagesList[step].description
+    const meaning = imagesList[step].meaning
+    const message = 'Description: ' + description + ' Meaning: ' + meaning
+    return message
+  }
+
   return (
     <div className={classes.root}>
       <Modal
@@ -99,7 +128,55 @@ export default function JourneyReview(props: any) {
         style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
       >
         <Paper>
-          <p>This is where form go</p>
+          <form
+            onSubmit={handleSubmit(vals => {
+              //   vals.created = new Date().getTime()
+              //   vals.reviewed = new Date().getTime()
+              //   vals.nextReview = new Date().getTime() + 86400000
+              vals.journeyID = props.reviewID
+              vals.order = imagesList.length
+              imageRef.push(vals)
+              setAddImageModal(false)
+              reset()
+            })}
+          >
+            <TextField
+              label='Where is your image located in the mind palace?'
+              name='location'
+              variant='outlined'
+              fullWidth
+              inputRef={register({
+                required: formErrorMessages.required
+              })}
+              error={!!errors.location}
+              helperText={errors.location?.message || ' '}
+            />
+            <TextField
+              label='What is the physical description of your image?'
+              name='description'
+              variant='outlined'
+              fullWidth
+              inputRef={register({
+                required: formErrorMessages.required
+              })}
+              error={!!errors.description}
+              helperText={errors.description?.message || ' '}
+            />
+            <TextField
+              label='What does this image mean or represent?'
+              name='meaning'
+              variant='outlined'
+              fullWidth
+              inputRef={register({
+                required: formErrorMessages.required
+              })}
+              error={!!errors.location}
+              helperText={errors.location?.message || ' '}
+            />
+            <Button type='submit' color='primary'>
+              Submit
+            </Button>
+          </form>
         </Paper>
       </Modal>
       <Stepper activeStep={activeStep} orientation='vertical'>
