@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "noImplicitAny": false,
     "lib": [
       "dom",
       "dom.iterable",
@@ -17,6 +18,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "noImplicitAny": false,
     "jsx": "react-jsx",
     "noFallthroughCasesInSwitch": true
   },

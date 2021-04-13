@@ -38,6 +38,17 @@ const EditForm = (props: any) => {
           error={!!errors.location}
           helperText={errors.location?.message || ' '}
         />
+        <TextField
+          label='Is there an image of the building or floorplan you would like to use? (Optional)'
+          name='image'
+          variant='outlined'
+          fullWidth
+          inputRef={register({
+            required: false
+          })}
+          error={!!errors.location}
+          helperText={errors.location?.message || ' '}
+        />
         <Button type='submit' color='primary'>
           Submit
         </Button>

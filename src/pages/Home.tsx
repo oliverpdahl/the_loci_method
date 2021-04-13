@@ -11,8 +11,11 @@ import {
   Card,
   CardActions,
   CardContent,
+  CardHeader,
+  CardMedia,
   IconButton,
-  Modal
+  Modal,
+  Grid
 } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
@@ -31,6 +34,8 @@ import AddCircleIcon from '@material-ui/icons/AddCircle'
 import { Edit } from '@material-ui/icons'
 import EditForm from '../components/EditForm'
 import JourneyReview from '../components/JourneyReview'
+import { ImageUpload } from '../components/ImageUploader.jsx'
+import { makeStyles } from '@material-ui/core/styles'
 
 const Home = () => {
   const { register, errors, handleSubmit, reset } = useForm<Journey>()
@@ -42,6 +47,23 @@ const Home = () => {
   const [toReviewJourneyList, setToReviewJourneyList] = useState(
     JourneyListEmpty.slice()
   )
+
+  const useStyles = makeStyles({
+    gridBox: {
+      flexGrow: 1
+    },
+    media: {
+      height: 140
+    },
+    card: {
+      maxWidth: 345
+    },
+    rightButton: {
+      align: 'right'
+    }
+  })
+
+  const classes = useStyles()
 
   const [openEditModal, setOpenEditModal] = useState(false)
   const [openReviewModal, setOpenReviewModal] = useState(false)
@@ -58,6 +80,7 @@ const Home = () => {
     created: number
     reviewed: number
     nextReview: number
+    image: string
   }
 
   useEffect(() => {
@@ -96,55 +119,64 @@ const Home = () => {
   }
 
   const createJourneyCard = (journey: Journey) => {
+    let cardMedia = () => {
+      if (journey.image?.length > 0) {
+        return <CardMedia className={classes.media} image={journey.image} />
+      }
+    }
     return (
-      <Card>
-        <CardContent>
-          <Typography color='textSecondary' gutterBottom>
-            {journey.id}
-          </Typography>
-          <Typography variant='h5' component='h2'>
-            {journey.title}
-          </Typography>
-          <Typography color='textSecondary'>{journey.location}</Typography>
-          <Typography variant='body2' component='p'>
-            Reviewed: {new Date(journey.reviewed).toString()}
-            <br />
-            Next Review: {new Date(journey.nextReview).toString()}
-            <br />
-            {'"a benevolent smile"'}
-          </Typography>
-        </CardContent>
-        <CardActions disableSpacing>
-          <IconButton
-            aria-label='review'
-            onClick={() => {
-              setOpenReviewModal(true)
-              setJourneyToReviewID(journey.id)
-              const nextReview = (journey.nextReview - journey.reviewed) * 2
-              setJourneyToReviewNextReview(nextReview)
-            }}
-          >
-            <RateReviewIcon />
-          </IconButton>
-          <IconButton
-            aria-label='edit'
-            onClick={() => {
-              setOpenEditModal(true)
-              setJourneyToEditID(journey.id)
-            }}
-          >
-            <EditIcon />
-          </IconButton>
-          <IconButton
-            aria-label='delete'
-            onClick={() => {
-              handleJourneyDelete(journey.id)
-            }}
-          >
-            <DeleteForeverIcon />
-          </IconButton>
-        </CardActions>
-      </Card>
+      <Grid item>
+        <Card className={classes.card}>
+          {cardMedia()}
+          <CardContent>
+            <Typography color='textSecondary' gutterBottom>
+              {journey.location}
+            </Typography>
+            <Typography variant='h5' component='h2'>
+              {journey.title}
+            </Typography>
+            {/* <Typography color='textSecondary'>{journey.location}</Typography> */}
+            <Typography variant='body2' component='p'>
+              <br />
+              Reviewed: {new Date(journey.reviewed).toLocaleString()}
+              <br />
+              Next Review: {new Date(journey.nextReview).toLocaleString()}
+              <br />
+            </Typography>
+          </CardContent>
+          <CardActions disableSpacing>
+            <IconButton
+              aria-label='review'
+              onClick={() => {
+                setOpenReviewModal(true)
+                setJourneyToReviewID(journey.id)
+                const nextReview = (journey.nextReview - journey.reviewed) * 2
+                setJourneyToReviewNextReview(nextReview)
+              }}
+            >
+              <RateReviewIcon />
+            </IconButton>
+            <IconButton
+              aria-label='edit'
+              onClick={() => {
+                setOpenEditModal(true)
+                setJourneyToEditID(journey.id)
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              aria-label='delete'
+              className='rightButton'
+              onClick={() => {
+                handleJourneyDelete(journey.id)
+              }}
+            >
+              <DeleteForeverIcon />
+            </IconButton>
+          </CardActions>
+        </Card>
+      </Grid>
     )
   }
 
@@ -153,7 +185,15 @@ const Home = () => {
     for (let i = 0; i < journeyList.length; i++) {
       list.push(createJourneyCard(journeyList[i]))
     }
-    return <div>{list}</div>
+    return (
+      <Grid container className={classes.gridBox} spacing={2}>
+        <Grid item xs={12}>
+          <Grid container spacing={2}>
+            {list}
+          </Grid>
+        </Grid>
+      </Grid>
+    )
   }
 
   return (
@@ -231,6 +271,8 @@ const Home = () => {
         </Paper>
         <p></p>
         <Paper>
+          {/* <ImageUpload onRequestSave={(id:any) => setImage(id)}
+              onRequestClear={() => setImage('')}/> */}
           <Accordion>
             <AccordionSummary expandIcon={<AddCircleIcon />}>
               Create a Journey
@@ -267,6 +309,17 @@ const Home = () => {
                   fullWidth
                   inputRef={register({
                     required: formErrorMessages.required
+                  })}
+                  error={!!errors.location}
+                  helperText={errors.location?.message || ' '}
+                />
+                <TextField
+                  label='Is there an image of the building or floorplan you would like to use? (Optional)'
+                  name='image'
+                  variant='outlined'
+                  fullWidth
+                  inputRef={register({
+                    required: false
                   })}
                   error={!!errors.location}
                   helperText={errors.location?.message || ' '}
