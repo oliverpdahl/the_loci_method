@@ -9,7 +9,7 @@ import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 import firebase from '../firebase'
 import PostAddIcon from '@material-ui/icons/PostAdd'
-import { IconButton, TextField } from '@material-ui/core'
+import { IconButton, TextField, Grid } from '@material-ui/core'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
 import EditIcon from '@material-ui/icons/Edit'
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward'
@@ -25,14 +25,24 @@ const useStyles = makeStyles(theme => ({
     width: '100%'
   },
   button: {
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(),
     marginRight: theme.spacing(1)
   },
   actionsContainer: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing()
   },
   resetContainer: {
     padding: theme.spacing(3)
+  },
+  addNewButton: {
+    align: 'center',
+    margin: theme.spacing(3)
+  },
+  formContainer: {
+    padding: theme.spacing(3)
+  },
+  stepperContainer: {
+    marginBottom: theme.spacing(-4)
   }
 }))
 
@@ -147,6 +157,7 @@ export default function JourneyReview(props: any) {
         onClose={() => {
           setOpenEditModal(false)
         }}
+        className={classes.formContainer}
         style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
       >
         <EditFormImage editID={imageToEditID} setModal={setOpenEditModal} />
@@ -159,6 +170,7 @@ export default function JourneyReview(props: any) {
       >
         <Paper>
           <form
+            className={classes.formContainer}
             onSubmit={handleSubmit(vals => {
               //   vals.created = new Date().getTime()
               //   vals.reviewed = new Date().getTime()
@@ -209,84 +221,102 @@ export default function JourneyReview(props: any) {
           </form>
         </Paper>
       </Modal>
-      <Stepper activeStep={activeStep} orientation='vertical'>
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>
-              {label}
-              {/* <IconButton>
+      {steps.length > 0 && (
+        <Stepper
+          activeStep={activeStep}
+          orientation='vertical'
+          className={classes.stepperContainer}
+        >
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>
+                {label}
+                {/* <IconButton>
                     <PostAddIcon/>
                 </IconButton> */}
-              <IconButton
-                onClick={() => {
-                  handleMoveUp(index)
-                }}
-              >
-                <ArrowUpwardIcon />
-              </IconButton>
-              <IconButton
-                onClick={() => {
-                  handleMoveDown(index)
-                }}
-              >
-                <ArrowDownwardIcon />
-              </IconButton>
-              <IconButton
-                onClick={() => {
-                  setOpenEditModal(true)
-                  setImageToEditID(getImageIDFromStep(index))
-                }}
-              >
-                <EditIcon />
-              </IconButton>
-              <IconButton
-                onClick={() => {
-                  handleDeleteImage(index)
-                }}
-              >
-                <DeleteForeverIcon />
-              </IconButton>
-            </StepLabel>
-            <StepContent>
-              <Typography>{getStepContent(index)}</Typography>
-              <div className={classes.actionsContainer}>
-                <div>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    className={classes.button}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    variant='contained'
-                    color='primary'
-                    onClick={handleNext}
-                    className={classes.button}
-                  >
-                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                  </Button>
+                <IconButton
+                  onClick={() => {
+                    handleMoveUp(index)
+                  }}
+                >
+                  <ArrowUpwardIcon />
+                </IconButton>
+                <IconButton
+                  onClick={() => {
+                    handleMoveDown(index)
+                  }}
+                >
+                  <ArrowDownwardIcon />
+                </IconButton>
+                <IconButton
+                  onClick={() => {
+                    setOpenEditModal(true)
+                    setImageToEditID(getImageIDFromStep(index))
+                  }}
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton
+                  onClick={() => {
+                    handleDeleteImage(index)
+                  }}
+                >
+                  <DeleteForeverIcon />
+                </IconButton>
+              </StepLabel>
+              <StepContent>
+                <Typography>{getStepContent(index)}</Typography>
+                <div className={classes.actionsContainer}>
+                  <div>
+                    <Button
+                      disabled={activeStep === 0}
+                      onClick={handleBack}
+                      className={classes.button}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      variant='contained'
+                      color='primary'
+                      onClick={handleNext}
+                      className={classes.button}
+                    >
+                      {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-      <Button
-        className={classes.button}
-        onClick={() => {
-          setAddImageModal(true)
-        }}
-      >
-        Add New Image
-      </Button>
-      {activeStep === steps.length - 1 && (
+              </StepContent>
+            </Step>
+          ))}
+        </Stepper>
+      )}
+      <Grid container justify='center'>
+        <Grid item>
+          <Button
+            variant='contained'
+            color='secondary'
+            className={classes.addNewButton}
+            onClick={() => {
+              setAddImageModal(true)
+            }}
+          >
+            Add New Image
+          </Button>
+        </Grid>
+      </Grid>
+
+      {activeStep === steps.length && steps.length > 0 && (
         <Paper square elevation={0} className={classes.resetContainer}>
           <Typography>All steps completed - you&apos;re finished</Typography>
           <Button onClick={handleReset} className={classes.button}>
             Reset
           </Button>
-          <Button onClick={handleCompleteReview} className={classes.button}>
+          <Button
+            onClick={handleCompleteReview}
+            className={classes.button}
+            variant='contained'
+            color='primary'
+          >
             Complete Review
           </Button>
         </Paper>

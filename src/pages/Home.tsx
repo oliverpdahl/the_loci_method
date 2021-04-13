@@ -48,7 +48,7 @@ const Home = () => {
     JourneyListEmpty.slice()
   )
 
-  const useStyles = makeStyles({
+  const useStyles = makeStyles(theme => ({
     gridBox: {
       flexGrow: 1
     },
@@ -60,8 +60,11 @@ const Home = () => {
     },
     rightButton: {
       align: 'right'
+    },
+    formContainer: {
+      padding: theme.spacing(3)
     }
-  })
+  }))
 
   const classes = useStyles()
 

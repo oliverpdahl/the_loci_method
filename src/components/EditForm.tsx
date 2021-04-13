@@ -3,13 +3,37 @@ import { Paper, TextField, Button } from '@material-ui/core'
 import { useForm } from 'react-hook-form'
 import firebase from '../firebase'
 import formErrorMessages from '../utils/formErrorMessages'
+import { makeStyles } from '@material-ui/core/styles'
 
 const EditForm = (props: any) => {
   const { register, errors, handleSubmit, reset } = useForm()
   const journeyRef = firebase.database().ref('Journey')
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      width: '100%'
+    },
+    button: {
+      marginTop: theme.spacing(1),
+      marginRight: theme.spacing(1)
+    },
+    actionsContainer: {
+      marginBottom: theme.spacing(2)
+    },
+    resetContainer: {
+      padding: theme.spacing(3)
+    },
+    formContainer: {
+      padding: theme.spacing(3)
+    }
+  }))
+
+  const classes = useStyles()
+
   return (
     <Paper>
       <form
+        className={classes.formContainer}
         onSubmit={handleSubmit(vals => {
           journeyRef.child(props.editID).update(vals)
           props.setModal(false)
