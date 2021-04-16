@@ -106,8 +106,8 @@ const Home = () => {
   const getJourneys = () => {
     const now = new Date().getTime()
     journeyRef
-      // .orderByChild('userID')
-      // .equalTo(userID)
+      .orderByChild('userID')
+      .equalTo(userID)
       .on('value', snapshot => {
         const journeys = snapshot.val()
         const reviewedList = JourneyListEmpty.slice()
@@ -115,10 +115,8 @@ const Home = () => {
         for (let id in journeys) {
           if (now > journeys[id].nextReview) {
             toReviewList.push({ id, ...journeys[id] })
-            console.log(id)
           } else {
             reviewedList.push({ id, ...journeys[id] })
-            console.log(id)
           }
         }
         setToReviewJourneyList(toReviewList)
