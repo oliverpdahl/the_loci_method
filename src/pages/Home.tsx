@@ -36,6 +36,7 @@ import EditForm from '../components/EditForm'
 import JourneyReview from '../components/JourneyReview'
 import { ImageUpload } from '../components/ImageUploader.jsx'
 import { makeStyles } from '@material-ui/core/styles'
+import { createMuiTheme } from '@material-ui/core/styles'
 
 const Home = () => {
   const { register, errors, handleSubmit, reset } = useForm<Journey>()
@@ -93,8 +94,8 @@ const Home = () => {
   const getJourneys = () => {
     const now = new Date().getTime()
     journeyRef
-      // .orderByChild('uid')
-      // .equalTo(firebase.auth().currentUser?.uid || '')
+      .orderByChild('uid')
+      .equalTo(firebase.auth().currentUser?.uid || '')
       .on('value', snapshot => {
         const journeys = snapshot.val()
         const reviewedList = JourneyListEmpty.slice()
@@ -317,7 +318,7 @@ const Home = () => {
                   helperText={errors.location?.message || ' '}
                 />
                 <TextField
-                  label='Is there an image of the building or floorplan you would like to use? (Optional)'
+                  label='Is there a link to an image of the building or floorplan you would like to use?'
                   name='image'
                   variant='outlined'
                   fullWidth

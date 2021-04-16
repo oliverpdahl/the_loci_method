@@ -19,6 +19,35 @@ import formErrorMessages from '../utils/formErrorMessages'
 import { useForm } from 'react-hook-form'
 import EditFormImage from '../components/EditFormImage'
 import 'rxjs/add/operator/map'
+import Tabs from '@material-ui/core/Tabs'
+import Tab from '@material-ui/core/Tab'
+import AppBar from '@material-ui/core/AppBar'
+import Box from '@material-ui/core/Box'
+
+function TabPanel(props: {
+  [x: string]: any
+  children: any
+  value: any
+  index: any
+}) {
+  const { children, value, index, ...other } = props
+
+  return (
+    <div
+      role='tabpanel'
+      hidden={value !== index}
+      id={`scrollable-auto-tabpanel-${index}`}
+      aria-labelledby={`scrollable-auto-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box p={3}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  )
+}
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,6 +90,12 @@ export default function JourneyReview(props: any) {
 
   const journeyRef = firebase.database().ref('Journey')
   const imageRef = firebase.database().ref('Image')
+
+  const [value, setValue] = React.useState(0)
+
+  const handleChange = (event: any, newValue: any) => {
+    setValue(newValue)
+  }
 
   type Image = {
     id: string
@@ -125,7 +160,25 @@ export default function JourneyReview(props: any) {
     const description = imagesList[step].description
     const meaning = imagesList[step].meaning
     const message = 'Description: ' + description + ' Meaning: ' + meaning
-    return message
+    return (
+      <Paper>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          indicatorColor='primary'
+          textColor='primary'
+        >
+          <Tab label='Description' />
+          <Tab label='Meaning' />
+        </Tabs>
+        <TabPanel value={value} index={0}>
+          {description}
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          {meaning}
+        </TabPanel>
+      </Paper>
+    )
   }
 
   const getImageIDFromStep = (step: any) => {

@@ -10,6 +10,8 @@ import {
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { Link } from 'react-router-dom'
 import NightsStayIcon from '@material-ui/icons/NightsStayOutlined'
+import logo from '../logo.png'
+import { createMuiTheme } from '@material-ui/core/styles'
 
 type Props = {
   title?: string
@@ -40,9 +42,9 @@ const AppBar = (props: Props) => {
             <ArrowBackIcon titleAccess='Navigate Back' />
           </IconButton>
         )}
-        {!props.backTo && <NightsStayIcon color='primary' fontSize='large' />}
         <Box ml={3} flex='auto'>
-          <Typography variant='h6'>{props.title}</Typography>
+          {/* <Typography variant='h6'>{props.title}</Typography> */}
+          <img style={{ height: 65, padding: 10 }} src={logo} />
         </Box>
         {props.actions}
       </Toolbar>
