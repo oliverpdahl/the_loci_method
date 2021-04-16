@@ -74,11 +74,12 @@ const Home = () => {
   const [journeyToEditID, setJourneyToEditID] = useState('')
   const [journeyToReviewID, setJourneyToReviewID] = useState('')
   const [journeyToReviewNextReview, setJourneyToReviewNextReview] = useState(0)
+  const [userID, setUserID] = useState('')
   const journeyRef = firebase.database().ref('Journey')
 
   type Journey = {
     id: string
-    uid: string
+    userID: string
     title: string
     location: string
     created: number
@@ -88,14 +89,25 @@ const Home = () => {
   }
 
   useEffect(() => {
-    getJourneys()
-  }, [])
+    const timer = setInterval(() => {
+      getJourneys()
+      getUserID()
+    }, 100)
+    return () => {
+      clearInterval(timer)
+    }
+  })
+
+  const getUserID = () => {
+    const userID = firebase.auth().currentUser?.uid || ''
+    setUserID(userID)
+  }
 
   const getJourneys = () => {
     const now = new Date().getTime()
     journeyRef
-      .orderByChild('uid')
-      .equalTo(firebase.auth().currentUser?.uid || '')
+      // .orderByChild('userID')
+      // .equalTo(userID)
       .on('value', snapshot => {
         const journeys = snapshot.val()
         const reviewedList = JourneyListEmpty.slice()
@@ -103,8 +115,10 @@ const Home = () => {
         for (let id in journeys) {
           if (now > journeys[id].nextReview) {
             toReviewList.push({ id, ...journeys[id] })
+            console.log(id)
           } else {
             reviewedList.push({ id, ...journeys[id] })
+            console.log(id)
           }
         }
         setToReviewJourneyList(toReviewList)
@@ -212,7 +226,7 @@ const Home = () => {
             to={routes.signin}
             variant='contained'
           >
-            Sign In or Sign Up
+            {userID != '' ? 'Log Out' : 'Sign In or Sign Up'}
           </Button>
         }
       />
@@ -284,10 +298,7 @@ const Home = () => {
             <AccordionDetails>
               <form
                 onSubmit={handleSubmit(vals => {
-                  var user = firebase.auth().currentUser
-                  if (user) {
-                    vals.uid = firebase.auth().currentUser?.uid || ''
-                  }
+                  vals.userID = firebase.auth().currentUser?.uid || ''
                   vals.created = new Date().getTime()
                   vals.reviewed = new Date().getTime()
                   vals.nextReview = new Date().getTime() + 86400000

@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom'
 import NightsStayIcon from '@material-ui/icons/NightsStayOutlined'
 import logo from '../logo.png'
 import { createMuiTheme } from '@material-ui/core/styles'
+import firebase from '../firebase'
 
 type Props = {
   title?: string
