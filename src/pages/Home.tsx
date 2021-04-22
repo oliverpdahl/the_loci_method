@@ -44,7 +44,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 const localizer = momentLocalizer(moment)
 
-const myEventsList = [
+const upcomingReviews = [
   { start: new Date(), end: new Date(), title: 'special event' }
 ]
 
@@ -286,7 +286,7 @@ const Home = () => {
         </Typography>
         <Calendar
           localizer={localizer}
-          events={myEventsList}
+          events={upcomingReviews}
           startAccessor='start'
           endAccessor='end'
           style={{ height: 500 }}
