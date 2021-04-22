@@ -15,7 +15,9 @@ import {
   CardMedia,
   IconButton,
   Modal,
-  Grid
+  Grid,
+  LinearProgress,
+  LinearProgressProps
 } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
@@ -47,6 +49,21 @@ const localizer = momentLocalizer(moment)
 let upcomingReviews = [
   { start: new Date(), end: new Date(), title: 'special event' }
 ]
+
+function LinearProgressWithLabel(props: any) {
+  return (
+    <Box display='flex' alignItems='center'>
+      <Box width='100%' mr={1}>
+        <LinearProgress variant='determinate' {...props} />
+      </Box>
+      <Box minWidth={35}>
+        <Typography variant='body2' color='textSecondary'>{`${Math.round(
+          props.value
+        )}%`}</Typography>
+      </Box>
+    </Box>
+  )
+}
 
 const Home = () => {
   const { register, errors, handleSubmit, reset } = useForm<Journey>()
@@ -292,6 +309,56 @@ const Home = () => {
           Journey - The mental walk you take through the images you have
           collected in the mind palace
         </Typography>
+        <Paper>
+          <p>
+            <Typography paragraph variant='h6'>
+              Next for Review
+            </Typography>
+            <Typography paragraph>
+              {toReviewJourneyList[0] && (
+                <Button
+                  aria-label='review'
+                  onClick={() => {
+                    setOpenReviewModal(true)
+                    setJourneyToReviewID(toReviewJourneyList[0].id)
+                    const nextReview =
+                      (toReviewJourneyList[0].nextReview -
+                        toReviewJourneyList[0].reviewed) *
+                      2
+                    setJourneyToReviewNextReview(nextReview)
+                  }}
+                >
+                  Review Next Journey
+                </Button>
+              )}
+              {!toReviewJourneyList[0] && "No Journey's for Review"}
+            </Typography>
+          </p>
+          <p>
+            <Typography paragraph variant='h6'>
+              Journeys Not up For Review
+            </Typography>
+            <Typography paragraph>{reviewedJourneyList.length}</Typography>
+          </p>
+          <p>
+            <Typography paragraph variant='h6'>
+              Journeys Up For Review
+            </Typography>
+            <Typography paragraph>{toReviewJourneyList.length}</Typography>
+          </p>
+          <p>
+            <Typography paragraph variant='h6'>
+              Progress
+            </Typography>
+            <LinearProgressWithLabel
+              value={
+                (reviewedJourneyList.length /
+                  (reviewedJourneyList.length + toReviewJourneyList.length)) *
+                100
+              }
+            />
+          </p>
+        </Paper>
         <Calendar
           localizer={localizer}
           events={upcomingReviews}
