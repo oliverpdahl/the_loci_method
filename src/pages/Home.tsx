@@ -38,6 +38,16 @@ import { ImageUpload } from '../components/ImageUploader.jsx'
 import { makeStyles } from '@material-ui/core/styles'
 import { createMuiTheme } from '@material-ui/core/styles'
 
+import { Calendar, momentLocalizer } from 'react-big-calendar'
+import moment from 'moment'
+import 'react-big-calendar/lib/css/react-big-calendar.css'
+
+const localizer = momentLocalizer(moment)
+
+const myEventsList = [
+  { start: new Date(), end: new Date(), title: 'special event' }
+]
+
 const Home = () => {
   const { register, errors, handleSubmit, reset } = useForm<Journey>()
 
@@ -274,6 +284,13 @@ const Home = () => {
           Journey - The mental walk you take through the images you have
           collected in the mind palace
         </Typography>
+        <Calendar
+          localizer={localizer}
+          events={myEventsList}
+          startAccessor='start'
+          endAccessor='end'
+          style={{ height: 500 }}
+        />
         <Paper>
           <Accordion>
             <AccordionSummary expandIcon={<ArrowDropDownCircleIcon />}>
