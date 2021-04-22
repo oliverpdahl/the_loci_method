@@ -44,7 +44,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 const localizer = momentLocalizer(moment)
 
-const upcomingReviews = [
+let upcomingReviews = [
   { start: new Date(), end: new Date(), title: 'special event' }
 ]
 
@@ -122,7 +122,14 @@ const Home = () => {
         const journeys = snapshot.val()
         const reviewedList = JourneyListEmpty.slice()
         const toReviewList = JourneyListEmpty.slice()
+        let nextReviews = []
         for (let id in journeys) {
+          const nextReview = new Date(journeys[id].nextReview)
+          nextReviews.push({
+            start: nextReview,
+            end: nextReview,
+            title: journeys[id].title
+          })
           if (now > journeys[id].nextReview) {
             toReviewList.push({ id, ...journeys[id] })
           } else {
@@ -131,6 +138,7 @@ const Home = () => {
         }
         setToReviewJourneyList(toReviewList)
         setReviewedJourneyList(reviewedList)
+        upcomingReviews = nextReviews
       })
   }
 
