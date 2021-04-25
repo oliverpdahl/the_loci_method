@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import Stepper from '@material-ui/core/Stepper'
 import Step from '@material-ui/core/Step'
 import StepLabel from '@material-ui/core/StepLabel'
+import StepButton from '@material-ui/core/StepButton'
 import StepContent from '@material-ui/core/StepContent'
 import Button from '@material-ui/core/Button'
 import Paper from '@material-ui/core/Paper'
@@ -63,6 +64,10 @@ const useStyles = makeStyles(theme => ({
   resetContainer: {
     padding: theme.spacing(3)
   },
+  completed: {
+    marginTop: theme.spacing(),
+    marginRight: theme.spacing(1)
+  },
   addNewButton: {
     align: 'center',
     margin: theme.spacing(3)
@@ -78,9 +83,11 @@ const useStyles = makeStyles(theme => ({
 export default function JourneyReview(props: any) {
   const ImageListEmpty: Image[] = []
   const StringListEmpty: string[] = []
+  const BooleanListEmpty: boolean[] = []
 
   const classes = useStyles()
   const [activeStep, setActiveStep] = React.useState(0)
+  const [completed, setCompleted] = React.useState(BooleanListEmpty.slice())
   const [openAddImageModal, setAddImageModal] = React.useState(false)
   const { register, errors, handleSubmit, reset } = useForm<Image>()
   const [imagesList, setImagesList] = React.useState(ImageListEmpty.slice())
@@ -110,16 +117,50 @@ export default function JourneyReview(props: any) {
     getImages()
   }, [])
 
+  const totalSteps = () => {
+    return steps.length
+  }
+
+  const completedSteps = () => {
+    return Object.keys(completed).length
+  }
+
+  const isLastStep = () => {
+    return activeStep === totalSteps() - 1
+  }
+
+  const allStepsCompleted = () => {
+    return completedSteps() === totalSteps()
+  }
+
   const handleNext = () => {
-    setActiveStep(prevActiveStep => prevActiveStep + 1)
+    const newActiveStep =
+      isLastStep() && !allStepsCompleted()
+        ? // It's the last step, but not all steps have been completed,
+          // find the first step that has been completed
+          steps.findIndex((step, i) => !(i in completed))
+        : activeStep + 1
+    setActiveStep(newActiveStep)
   }
 
   const handleBack = () => {
     setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
 
+  const handleStep = (step: any) => () => {
+    setActiveStep(step)
+  }
+
+  const handleComplete = () => {
+    const newCompleted = completed
+    newCompleted[activeStep] = true
+    setCompleted(newCompleted)
+    handleNext()
+  }
+
   const handleReset = () => {
     setActiveStep(0)
+    setCompleted([])
   }
 
   const handleCompleteReview = () => {
@@ -279,10 +320,14 @@ export default function JourneyReview(props: any) {
           activeStep={activeStep}
           orientation='vertical'
           className={classes.stepperContainer}
+          nonLinear
         >
           {steps.map((label, index) => (
             <Step key={label}>
-              <StepLabel>
+              <StepButton
+                onClick={handleStep(index)}
+                completed={completed[index]}
+              >
                 {label}
                 {/* <IconButton>
                     <PostAddIcon/>
@@ -316,7 +361,7 @@ export default function JourneyReview(props: any) {
                 >
                   <DeleteForeverIcon />
                 </IconButton>
-              </StepLabel>
+              </StepButton>
               <StepContent>
                 <Typography>{getStepContent(index)}</Typography>
                 <div className={classes.actionsContainer}>
@@ -334,8 +379,27 @@ export default function JourneyReview(props: any) {
                       onClick={handleNext}
                       className={classes.button}
                     >
-                      {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                      Next
                     </Button>
+                    {activeStep !== steps.length &&
+                      (completed[activeStep] ? (
+                        <Typography
+                          variant='caption'
+                          className={classes.completed}
+                        >
+                          Step {activeStep + 1} already completed
+                        </Typography>
+                      ) : (
+                        <Button
+                          variant='contained'
+                          color='primary'
+                          onClick={handleComplete}
+                        >
+                          {completedSteps() === totalSteps() - 1
+                            ? 'Finish'
+                            : 'Complete Step'}
+                        </Button>
+                      ))}
                   </div>
                 </div>
               </StepContent>
@@ -358,7 +422,7 @@ export default function JourneyReview(props: any) {
         </Grid>
       </Grid>
 
-      {activeStep === steps.length && steps.length > 0 && (
+      {completedSteps() === totalSteps() && steps.length > 0 && (
         <Paper square elevation={0} className={classes.resetContainer}>
           <Typography>All steps completed - you&apos;re finished</Typography>
           <Button onClick={handleReset} className={classes.button}>

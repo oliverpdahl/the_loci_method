@@ -43,6 +43,7 @@ import { createMuiTheme } from '@material-ui/core/styles'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import theme from '../theme'
 
 const localizer = momentLocalizer(moment)
 
@@ -91,6 +92,12 @@ const Home = () => {
     },
     formContainer: {
       padding: theme.spacing(3)
+    },
+    paper: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+      backgroundColor: '#47e398'
     }
   }))
 
@@ -309,6 +316,59 @@ const Home = () => {
           Journey - The mental walk you take through the images you have
           collected in the mind palace
         </Typography>
+        <Paper
+          style={{
+            padding: theme.spacing(1),
+            marginBottom: theme.spacing(3),
+            backgroundColor: '#6be8ac'
+          }}
+        >
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              <Paper className={classes.paper}>
+                {toReviewJourneyList[0] && (
+                  <Button
+                    aria-label='review'
+                    onClick={() => {
+                      setOpenReviewModal(true)
+                      setJourneyToReviewID(toReviewJourneyList[0].id)
+                      const nextReview =
+                        (toReviewJourneyList[0].nextReview -
+                          toReviewJourneyList[0].reviewed) *
+                        2
+                      setJourneyToReviewNextReview(nextReview)
+                    }}
+                  >
+                    Review Next Journey: {toReviewJourneyList[0].title}
+                  </Button>
+                )}
+                {!toReviewJourneyList[0] && "No Journey's for Review"}
+              </Paper>
+            </Grid>
+            <Grid item xs={3}>
+              <Paper className={classes.paper}>
+                Up To Date: {reviewedJourneyList.length}
+              </Paper>
+            </Grid>
+            <Grid item xs={3}>
+              <Paper className={classes.paper}>
+                For Review: {toReviewJourneyList.length}
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <LinearProgressWithLabel
+                  value={
+                    (reviewedJourneyList.length /
+                      (reviewedJourneyList.length +
+                        toReviewJourneyList.length)) *
+                    100
+                  }
+                />
+              </Paper>
+            </Grid>
+          </Grid>
+        </Paper>
         <Paper>
           <p>
             <Typography paragraph variant='h6'>
@@ -328,7 +388,7 @@ const Home = () => {
                     setJourneyToReviewNextReview(nextReview)
                   }}
                 >
-                  Review Next Journey
+                  Review Next Journey: {toReviewJourneyList[0].title}
                 </Button>
               )}
               {!toReviewJourneyList[0] && "No Journey's for Review"}
