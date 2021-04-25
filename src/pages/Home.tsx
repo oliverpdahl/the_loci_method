@@ -110,7 +110,16 @@ const Home = () => {
 
   const classes = useStyles()
 
-  const emptyJourney = {} as Journey
+  const emptyJourney = {
+    id: '',
+    userID: '',
+    title: '',
+    location: '',
+    created: 0,
+    reviewed: 0,
+    nextReview: 0,
+    image: ''
+  }
 
   // let upcomingReviews = [{ start: new Date(), end: new Date(), title: '', journey: emptyJourney}]
 
@@ -169,7 +178,7 @@ const Home = () => {
             start: nextReview,
             end: nextReview,
             title: journeys[id].title as string,
-            journey: journeys[id] as Journey
+            journey: { id, ...journeys[id] }
           })
           if (now > journeys[id].nextReview) {
             toReviewList.push({ id, ...journeys[id] })
@@ -323,8 +332,64 @@ const Home = () => {
             className={classes.modal}
           >
             <Paper>
-              {journeyToModal != emptyJourney &&
-                createJourneyCard(journeyToModal)}
+              {journeyToModal != emptyJourney && (
+                <Card className={classes.card}>
+                  {/* {cardMedia()} */}
+                  <CardContent>
+                    <Typography color='textSecondary' gutterBottom>
+                      {journeyToModal.location}
+                    </Typography>
+                    <Typography variant='h5' component='h2'>
+                      {journeyToModal.title}
+                    </Typography>
+                    {/* <Typography color='textSecondary'>{journeyToModal.location}</Typography> */}
+                    <Typography variant='body2' component='p'>
+                      <br />
+                      Reviewed:{' '}
+                      {new Date(journeyToModal.reviewed).toLocaleString()}
+                      <br />
+                      Next Review:{' '}
+                      {new Date(journeyToModal.nextReview).toLocaleString()}
+                      <br />
+                    </Typography>
+                  </CardContent>
+                  <CardActions disableSpacing>
+                    <IconButton
+                      aria-label='review'
+                      onClick={() => {
+                        setOpenReviewModal(true)
+                        setJourneyToReviewID(journeyToModal.id)
+                        const nextReview =
+                          (journeyToModal.nextReview -
+                            journeyToModal.reviewed) *
+                          2
+                        setJourneyToReviewNextReview(nextReview)
+                      }}
+                    >
+                      <RateReviewIcon />
+                    </IconButton>
+                    <IconButton
+                      aria-label='edit'
+                      onClick={() => {
+                        setOpenEditModal(true)
+                        setJourneyToEditID(journeyToModal.id)
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      aria-label='delete'
+                      className='rightButton'
+                      onClick={() => {
+                        handleJourneyDelete(journeyToModal.id)
+                        setOpenCalendarCardModal(false)
+                      }}
+                    >
+                      <DeleteForeverIcon />
+                    </IconButton>
+                  </CardActions>
+                </Card>
+              )}
             </Paper>
           </Modal>
         </Box>
