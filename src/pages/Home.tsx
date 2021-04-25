@@ -47,20 +47,16 @@ import theme from '../theme'
 
 const localizer = momentLocalizer(moment)
 
-let upcomingReviews = [
-  { start: new Date(), end: new Date(), title: 'special event' }
-]
-
 function LinearProgressWithLabel(props: any) {
   return (
     <Box display='flex' alignItems='center'>
       <Box width='100%' mr={1}>
-        <LinearProgress variant='determinate' {...props} />
+        <LinearProgress variant='determinate' color='secondary' {...props} />
       </Box>
       <Box minWidth={35}>
-        <Typography variant='body2' color='textSecondary'>{`${Math.round(
-          props.value
-        )}%`}</Typography>
+        <Typography variant='body2' color='inherit'>
+          <strong>{`${Math.round(props.value)}%`}</strong>
+        </Typography>
       </Box>
     </Box>
   )
@@ -96,17 +92,37 @@ const Home = () => {
     paper: {
       padding: theme.spacing(2),
       textAlign: 'center',
-      color: theme.palette.text.secondary,
+      color: 'white',
       backgroundColor: '#47e398'
+    },
+    modal: {
+      paddingLeft: '16px',
+      paddingRight: '16px',
+      maxWidth: '960px',
+      margin: 'auto',
+      paddingTop: theme.spacing(10)
+    },
+    modalContainer: {
+      display: 'flex',
+      alignItems: 'center'
     }
   }))
 
   const classes = useStyles()
 
+  const emptyJourney = {} as Journey
+
+  // let upcomingReviews = [{ start: new Date(), end: new Date(), title: '', journey: emptyJourney}]
+
   const [openEditModal, setOpenEditModal] = useState(false)
   const [openReviewModal, setOpenReviewModal] = useState(false)
+  const [openCalendarCardModal, setOpenCalendarCardModal] = useState(false)
+  const [journeyToModal, setJourneyToModal] = useState(emptyJourney)
   const [journeyToEditID, setJourneyToEditID] = useState('')
   const [journeyToReviewID, setJourneyToReviewID] = useState('')
+  const [upcomingReviews, setUpcomingReviews] = useState([
+    { start: new Date(), end: new Date(), title: '', journey: emptyJourney }
+  ])
   const [journeyToReviewNextReview, setJourneyToReviewNextReview] = useState(0)
   const [userID, setUserID] = useState('')
   const journeyRef = firebase.database().ref('Journey')
@@ -152,7 +168,8 @@ const Home = () => {
           nextReviews.push({
             start: nextReview,
             end: nextReview,
-            title: journeys[id].title
+            title: journeys[id].title as string,
+            journey: journeys[id] as Journey
           })
           if (now > journeys[id].nextReview) {
             toReviewList.push({ id, ...journeys[id] })
@@ -162,7 +179,7 @@ const Home = () => {
         }
         setToReviewJourneyList(toReviewList)
         setReviewedJourneyList(reviewedList)
-        upcomingReviews = nextReviews
+        setUpcomingReviews(nextReviews)
       })
   }
 
@@ -238,6 +255,8 @@ const Home = () => {
     )
   }
 
+  const CURRENT_DATE = moment().toDate()
+
   const createJourneyCards = (journeyList: Journey[]) => {
     let list = []
     for (let i = 0; i < journeyList.length; i++) {
@@ -270,89 +289,127 @@ const Home = () => {
           </Button>
         }
       />
-      <Modal
-        open={openEditModal}
-        onClose={() => {
-          setOpenEditModal(false)
-        }}
-        style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
-      >
-        <EditForm editID={journeyToEditID} setModal={setOpenEditModal} />
-      </Modal>
-      <Modal
-        open={openReviewModal}
-        onClose={() => {
-          setOpenReviewModal(false)
-        }}
-        style={{ width: '80%', position: 'fixed', top: '40%', left: '10%' }}
-      >
-        <Paper>
-          <JourneyReview
-            reviewID={journeyToReviewID}
-            setModal={setOpenReviewModal}
-            nextReview={journeyToReviewNextReview}
-          />
-        </Paper>
-      </Modal>
       <Wrapper>
+        <Box className={classes.modalContainer}>
+          <Modal
+            open={openEditModal}
+            onClose={() => {
+              setOpenEditModal(false)
+            }}
+            className={classes.modal}
+          >
+            <EditForm editID={journeyToEditID} setModal={setOpenEditModal} />
+          </Modal>
+          <Modal
+            open={openReviewModal}
+            onClose={() => {
+              setOpenReviewModal(false)
+            }}
+            className={classes.modal}
+          >
+            <Paper>
+              <JourneyReview
+                reviewID={journeyToReviewID}
+                setModal={setOpenReviewModal}
+                nextReview={journeyToReviewNextReview}
+              />
+            </Paper>
+          </Modal>
+          <Modal
+            open={openCalendarCardModal}
+            onClose={() => {
+              setOpenCalendarCardModal(false)
+            }}
+            className={classes.modal}
+          >
+            <Paper>
+              {journeyToModal != emptyJourney &&
+                createJourneyCard(journeyToModal)}
+            </Paper>
+          </Modal>
+        </Box>
+
         <Typography paragraph>{currentUserString()}</Typography>
-        <Typography paragraph variant='h3'>
-          Create Mind Palaces to Remember Like Never Before
-        </Typography>
-        <Typography paragraph variant='h6'>
-          An ideal mind palace is a brightly lit deserted place with a standard
-          rout through it like a museum or school after hours and is filled with
-          striking images of people doing an action to encode information with a
-          key transition at every fifth image
-        </Typography>
-        <Typography paragraph>
-          Key Vocabulary:
-          <br />
-          Image - The visual representation of what you are trying to remember
-          <br />
-          Mind Palace - The visualization or a real or imaginary place where you
-          store images
-          <br />
-          Journey - The mental walk you take through the images you have
-          collected in the mind palace
-        </Typography>
+        <Paper>
+          <Accordion>
+            <AccordionSummary expandIcon={<ArrowDropDownCircleIcon />}>
+              <h3>Create Mind Palaces to Remember Like Never Before</h3>
+            </AccordionSummary>
+            <Divider />
+            <AccordionDetails>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography paragraph variant='h6'>
+                    An ideal mind palace is a brightly lit deserted place with a
+                    standard rout through it like a museum or school after hours
+                    and is filled with striking images of people doing an action
+                    to encode information with a key transition at every fifth
+                    image
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography paragraph>
+                    Key Vocabulary:
+                    <br />
+                    Image - The visual representation of what you are trying to
+                    remember
+                    <br />
+                    Mind Palace - The visualization or a real or imaginary place
+                    where you store images
+                    <br />
+                    Journey - The mental walk you take through the images you
+                    have collected in the mind palace
+                  </Typography>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        </Paper>
         <Paper
           style={{
             padding: theme.spacing(1),
-            marginBottom: theme.spacing(3),
+            marginBottom: theme.spacing(4),
+            marginTop: theme.spacing(2),
             backgroundColor: '#6be8ac'
           }}
         >
           <Grid container spacing={1}>
             <Grid item xs={6}>
+              {toReviewJourneyList[0] && (
+                <Button
+                  size='large'
+                  variant='contained'
+                  color='primary'
+                  style={{ height: '100%', width: '100%', color: 'white' }}
+                  aria-label='review'
+                  onClick={() => {
+                    setOpenReviewModal(true)
+                    setJourneyToReviewID(toReviewJourneyList[0].id)
+                    const nextReview =
+                      (toReviewJourneyList[0].nextReview -
+                        toReviewJourneyList[0].reviewed) *
+                      2
+                    setJourneyToReviewNextReview(nextReview)
+                  }}
+                >
+                  Review Next Journey: {toReviewJourneyList[0].title}
+                </Button>
+              )}
+              {!toReviewJourneyList[0] && (
+                <Button disabled>
+                  All Caught Up! No Journeys Up for Review
+                </Button>
+              )}
+            </Grid>
+            <Grid item xs={3}>
               <Paper className={classes.paper}>
-                {toReviewJourneyList[0] && (
-                  <Button
-                    aria-label='review'
-                    onClick={() => {
-                      setOpenReviewModal(true)
-                      setJourneyToReviewID(toReviewJourneyList[0].id)
-                      const nextReview =
-                        (toReviewJourneyList[0].nextReview -
-                          toReviewJourneyList[0].reviewed) *
-                        2
-                      setJourneyToReviewNextReview(nextReview)
-                    }}
-                  >
-                    Review Next Journey: {toReviewJourneyList[0].title}
-                  </Button>
-                )}
-                {!toReviewJourneyList[0] && "No Journey's for Review"}
+                Up To Date: <strong>{reviewedJourneyList.length}</strong>
               </Paper>
             </Grid>
             <Grid item xs={3}>
               <Paper className={classes.paper}>
-                Up To Date: {reviewedJourneyList.length}
-              </Paper>
-            </Grid>
-            <Grid item xs={3}>
-              <Paper className={classes.paper}>
-                For Review: {toReviewJourneyList.length}
+                For Review: <strong>{toReviewJourneyList.length}</strong>
               </Paper>
             </Grid>
             <Grid item xs={12}>
@@ -369,74 +426,34 @@ const Home = () => {
             </Grid>
           </Grid>
         </Paper>
-        <Paper>
-          <p>
-            <Typography paragraph variant='h6'>
-              Next for Review
-            </Typography>
-            <Typography paragraph>
-              {toReviewJourneyList[0] && (
-                <Button
-                  aria-label='review'
-                  onClick={() => {
-                    setOpenReviewModal(true)
-                    setJourneyToReviewID(toReviewJourneyList[0].id)
-                    const nextReview =
-                      (toReviewJourneyList[0].nextReview -
-                        toReviewJourneyList[0].reviewed) *
-                      2
-                    setJourneyToReviewNextReview(nextReview)
-                  }}
-                >
-                  Review Next Journey: {toReviewJourneyList[0].title}
-                </Button>
-              )}
-              {!toReviewJourneyList[0] && "No Journey's for Review"}
-            </Typography>
-          </p>
-          <p>
-            <Typography paragraph variant='h6'>
-              Journeys Not up For Review
-            </Typography>
-            <Typography paragraph>{reviewedJourneyList.length}</Typography>
-          </p>
-          <p>
-            <Typography paragraph variant='h6'>
-              Journeys Up For Review
-            </Typography>
-            <Typography paragraph>{toReviewJourneyList.length}</Typography>
-          </p>
-          <p>
-            <Typography paragraph variant='h6'>
-              Progress
-            </Typography>
-            <LinearProgressWithLabel
-              value={
-                (reviewedJourneyList.length /
-                  (reviewedJourneyList.length + toReviewJourneyList.length)) *
-                100
-              }
-            />
-          </p>
-        </Paper>
         <Calendar
+          popup
+          selectable
           localizer={localizer}
           events={upcomingReviews}
           startAccessor='start'
           endAccessor='end'
           style={{ height: 500 }}
+          eventPropGetter={(event, start, end, isSelected) => {
+            let newStyle = {
+              backgroundColor: '#47e398',
+              color: 'white'
+            }
+
+            if (start > new Date()) {
+              newStyle.backgroundColor = 'lightgrey'
+            }
+
+            return {
+              // className: "",
+              style: newStyle
+            }
+          }}
+          onSelectEvent={event => {
+            setJourneyToModal(event.journey)
+            setOpenCalendarCardModal(true)
+          }}
         />
-        <Paper>
-          <Accordion>
-            <AccordionSummary expandIcon={<ArrowDropDownCircleIcon />}>
-              Journeys to Review
-            </AccordionSummary>
-            <Divider />
-            <AccordionDetails>
-              {createJourneyCards(toReviewJourneyList)}
-            </AccordionDetails>
-          </Accordion>
-        </Paper>
         <p></p>
         <Paper>
           {/* <ImageUpload onRequestSave={(id:any) => setImage(id)}
@@ -496,7 +513,19 @@ const Home = () => {
             </AccordionDetails>
           </Accordion>
         </Paper>
-        <p></p>
+        <br />
+        <Paper>
+          <Accordion>
+            <AccordionSummary expandIcon={<ArrowDropDownCircleIcon />}>
+              Journeys to Review
+            </AccordionSummary>
+            <Divider />
+            <AccordionDetails>
+              {createJourneyCards(toReviewJourneyList)}
+            </AccordionDetails>
+          </Accordion>
+        </Paper>
+        <br />
 
         <Paper>
           <Accordion>
@@ -508,6 +537,29 @@ const Home = () => {
               {createJourneyCards(reviewedJourneyList)}
             </AccordionDetails>
           </Accordion>
+        </Paper>
+        <Paper
+          style={{
+            padding: theme.spacing(1),
+            marginBottom: theme.spacing(4),
+            marginTop: theme.spacing(2),
+            backgroundColor: '#6be8ac'
+          }}
+        >
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              <Paper className={classes.paper}>
+                Total Journey Reviews:{' '}
+                <strong>{reviewedJourneyList.length}</strong>
+              </Paper>
+            </Grid>
+            <Grid item xs={6}>
+              <Paper className={classes.paper}>
+                Total Image Reviews:{' '}
+                <strong>{toReviewJourneyList.length}</strong>
+              </Paper>
+            </Grid>
+          </Grid>
         </Paper>
       </Wrapper>
     </>
