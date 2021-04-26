@@ -336,6 +336,7 @@ const Home = () => {
               setOpenCalendarCardModal(false)
             }}
             className={classes.modal}
+            style={{ maxWidth: '345px', marginTop: '25%' }}
           >
             <Paper>
               {journeyToModal != emptyJourney && (
