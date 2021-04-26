@@ -336,12 +336,18 @@ const Home = () => {
               setOpenCalendarCardModal(false)
             }}
             className={classes.modal}
-            style={{ maxWidth: '345px', marginTop: '25%' }}
+            style={{ maxWidth: '345px' }}
           >
             <Paper>
               {journeyToModal != emptyJourney && (
                 <Card className={classes.card}>
                   {/* {cardMedia()} */}
+                  {journeyToModal.image?.length > 0 && (
+                    <CardMedia
+                      className={classes.media}
+                      image={journeyToModal.image}
+                    />
+                  )}
                   <CardContent>
                     <Typography color='textSecondary' gutterBottom>
                       {journeyToModal.location}
@@ -381,6 +387,7 @@ const Home = () => {
                       onClick={() => {
                         setOpenEditModal(true)
                         setJourneyToEditID(journeyToModal.id)
+                        setOpenCalendarCardModal(false)
                       }}
                     >
                       <EditIcon />
