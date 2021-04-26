@@ -171,13 +171,11 @@ export default function JourneyReview(props: any) {
   const setReviewedToNow = (id: string) => {
     const now = new Date().getTime()
     console.log(props.nextReview)
-    journeyRef
-      .child(id)
-      .update({
-        reviewed: now,
-        nextReview: now + props.nextReview,
-        count: 1 + props.count
-      })
+    journeyRef.child(id).update({
+      reviewed: now,
+      nextReview: now + props.nextReview,
+      count: 1 + props.count
+    })
   }
 
   const handleClose = () => {
@@ -246,6 +244,9 @@ export default function JourneyReview(props: any) {
 
   const handleDeleteImage = (step: any) => {
     imageRef.child(getImageIDFromStep(step)).remove()
+    setCompleted(completed.splice(step, 1))
+    setSteps(steps.splice(steps.indexOf(step), 1))
+    getImages()
   }
 
   return (
@@ -398,6 +399,7 @@ export default function JourneyReview(props: any) {
                           variant='contained'
                           color='primary'
                           onClick={handleComplete}
+                          className={classes.button}
                         >
                           {completedSteps() === totalSteps() - 1
                             ? 'Finish'
@@ -426,7 +428,7 @@ export default function JourneyReview(props: any) {
         </Grid>
       </Grid>
 
-      {completedSteps() === totalSteps() - 1 && steps.length > 0 && (
+      {completedSteps() === totalSteps() && steps.length > 0 && (
         <Paper square elevation={0} className={classes.resetContainer}>
           <Typography>All steps completed - you&apos;re finished</Typography>
           <Button onClick={handleReset} className={classes.button}>
