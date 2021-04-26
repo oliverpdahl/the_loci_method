@@ -641,7 +641,11 @@ const Home = () => {
                   {reviewedJourneyList.reduce(
                     (count, journey) => count + journey.count,
                     0
-                  )}
+                  ) +
+                    toReviewJourneyList.reduce(
+                      (count, journey) => count + journey.count,
+                      0
+                    )}
                 </strong>
               </Paper>
             </Grid>
