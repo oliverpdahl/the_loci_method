@@ -462,7 +462,12 @@ const Home = () => {
                 </Button>
               )}
               {!toReviewJourneyList[0] && (
-                <Button disabled>
+                <Button
+                  disabled
+                  size='large'
+                  variant='contained'
+                  style={{ height: '100%', width: '100%', color: 'white' }}
+                >
                   All Caught Up! No Journeys Up for Review
                 </Button>
               )}

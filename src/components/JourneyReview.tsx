@@ -422,7 +422,7 @@ export default function JourneyReview(props: any) {
         </Grid>
       </Grid>
 
-      {completedSteps() === totalSteps() && steps.length > 0 && (
+      {completedSteps() === totalSteps() - 1 && steps.length > 0 && (
         <Paper square elevation={0} className={classes.resetContainer}>
           <Typography>All steps completed - you&apos;re finished</Typography>
           <Button onClick={handleReset} className={classes.button}>
