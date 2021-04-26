@@ -118,7 +118,8 @@ const Home = () => {
     created: 0,
     reviewed: 0,
     nextReview: 0,
-    image: ''
+    image: '',
+    count: 0
   }
 
   // let upcomingReviews = [{ start: new Date(), end: new Date(), title: '', journey: emptyJourney}]
@@ -133,6 +134,7 @@ const Home = () => {
     { start: new Date(), end: new Date(), title: '', journey: emptyJourney }
   ])
   const [journeyToReviewNextReview, setJourneyToReviewNextReview] = useState(0)
+  const [journeyToReviewCount, setJourneyToReviewCount] = useState(0)
   const [userID, setUserID] = useState('')
   const journeyRef = firebase.database().ref('Journey')
 
@@ -145,6 +147,7 @@ const Home = () => {
     reviewed: number
     nextReview: number
     image: string
+    count: number
   }
 
   useEffect(() => {
@@ -226,6 +229,7 @@ const Home = () => {
               <br />
               Next Review: {new Date(journey.nextReview).toLocaleString()}
               <br />
+              Times Reviewed: {journey.count}
             </Typography>
           </CardContent>
           <CardActions disableSpacing>
@@ -236,6 +240,7 @@ const Home = () => {
                 setJourneyToReviewID(journey.id)
                 const nextReview = (journey.nextReview - journey.reviewed) * 2
                 setJourneyToReviewNextReview(nextReview)
+                setJourneyToReviewCount(journey.count)
               }}
             >
               <RateReviewIcon />
@@ -321,6 +326,7 @@ const Home = () => {
                 reviewID={journeyToReviewID}
                 setModal={setOpenReviewModal}
                 nextReview={journeyToReviewNextReview}
+                count={journeyToReviewCount}
               />
             </Paper>
           </Modal>
@@ -364,6 +370,7 @@ const Home = () => {
                             journeyToModal.reviewed) *
                           2
                         setJourneyToReviewNextReview(nextReview)
+                        setJourneyToReviewCount(journeyToModal.count)
                       }}
                     >
                       <RateReviewIcon />
@@ -456,6 +463,7 @@ const Home = () => {
                         toReviewJourneyList[0].reviewed) *
                       2
                     setJourneyToReviewNextReview(nextReview)
+                    setJourneyToReviewCount(toReviewJourneyList[0].count)
                   }}
                 >
                   Review Next Journey: {toReviewJourneyList[0].title}
@@ -539,6 +547,7 @@ const Home = () => {
                   vals.created = new Date().getTime()
                   vals.reviewed = new Date().getTime()
                   vals.nextReview = new Date().getTime() + 86400000
+                  vals.count = 0
                   journeyRef.push(vals)
                   reset()
                 })}
@@ -617,18 +626,23 @@ const Home = () => {
           }}
         >
           <Grid container spacing={1}>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <Paper className={classes.paper}>
                 Total Journey Reviews:{' '}
-                <strong>{reviewedJourneyList.length}</strong>
+                <strong>
+                  {reviewedJourneyList.reduce(
+                    (count, journey) => count + journey.count,
+                    0
+                  )}
+                </strong>
               </Paper>
             </Grid>
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
               <Paper className={classes.paper}>
                 Total Image Reviews:{' '}
                 <strong>{toReviewJourneyList.length}</strong>
               </Paper>
-            </Grid>
+        </Grid>*/}
           </Grid>
         </Paper>
       </Wrapper>

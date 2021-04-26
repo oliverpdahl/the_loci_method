@@ -173,7 +173,11 @@ export default function JourneyReview(props: any) {
     console.log(props.nextReview)
     journeyRef
       .child(id)
-      .update({ reviewed: now, nextReview: now + props.nextReview })
+      .update({
+        reviewed: now,
+        nextReview: now + props.nextReview,
+        count: 1 + props.count
+      })
   }
 
   const handleClose = () => {
